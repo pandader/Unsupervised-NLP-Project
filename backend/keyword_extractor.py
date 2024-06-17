@@ -8,20 +8,8 @@ from scipy.sparse import csr_matrix
 from sklearn.utils import check_array
 from sklearn.preprocessing import normalize
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-
-### utilities
-
-def preprocess_text(documents: np.ndarray) -> List[str]:
-    """ Basic preprocessing of text
-    Steps:
-        * Replace \n and \t with whitespace
-        * Only keep alpha-numerical characters
-    """
-    cleaned_documents = [doc.replace("\n", " ") for doc in documents]
-    cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]
-    cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
-    cleaned_documents = [doc if doc != "" else "emptydoc" for doc in cleaned_documents]
-    return cleaned_documents
+# local
+from .utils import preprocess_text
 
 def top_n_idx_sparse(matrix: csr_matrix, n: int) -> np.ndarray:
     indices = []
@@ -182,11 +170,11 @@ class KeywordExtractor:
         self.topics = extract_words_per_topic(words, df_concat, ctfidf, self.top_n_words)
 
     def get_topics_and_docs(self, df_data, num_reps):
-        ### very basic version, just random sample [can be improve]
+        # very basic version, just random sample [can be improve]
         content = []
         for idx, row in self.df_comb.iterrows():
-            num_choices = min(len(row['index']), num_reps)
-            indices = random.choices(row['index'], k=num_choices)
+            num_choices = min(len(row['id']), num_reps)
+            indices = random.choices(row['id'], k=num_choices)
             docs = df_data.loc[indices]['text'].values.tolist()
             kws = ', '.join([each[0] for each in self.topics[idx]])
             content.append([kws, docs])
